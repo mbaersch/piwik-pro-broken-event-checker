@@ -44,18 +44,18 @@ def do_check(args):
                 rep_end = json_session["updated_at"]
                 events =  json_session["events"]
                 for event in events:
-                    #Sample für erstes passendes Event auslesen und Schleife beenden
+                    #get sample event and quit loop
                     if event["event_type"][0] == search_debug_type:
                         event_id = str(event["event_id"])
                         res += "found " + event["event_type"][1] + ", ID: " + event_id + "\n"
                         err = "no errors"
                         if "error_message" in event:
                             err = event["error_message"]
-                            #Debug - Daten zum Event aus dem Log abrufen 
+                            #get debug info from log
                             log_response = requests.get(credentials["instance_url"] + '/api/tracker/v1/log?app_id='+site_id+'&event_ids='+event_id+'&server_time_min=' + rep_start + '&server_time_max=' + rep_end, headers={"Authorization": 'Bearer ' + token})
                             err += "\n\nLOG:\n----n" + log_response.content.decode()
                         res += err  + "\n"
-                        hook_payload = {"text" : 'PP Event Checker: ' + event["event_type"][1] + ' hat folgende Meldung erzeugt: ' + err}
+                        hook_payload = {"text" : 'PP Event Checker: ' + event["event_type"][1] + ' found with following message: ' + err}
                         hook_response = requests.post(webhook_url, headers = {"Content-type": 'application/json'}, json = hook_payload)
                         break
             except:
