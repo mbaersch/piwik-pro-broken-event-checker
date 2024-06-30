@@ -14,6 +14,8 @@ Open the *Runtime, build, connections and security settings* block and create th
 - `PP_CLIENT_ID`: your API client ID from your Piwik PRO account (help article about [how to find API credentials](https://help.piwik.pro/support/questions/generate-api-credentials/))
 - `PP_CLIENT_SECRET`: your API client secret from your Piwik PRO account
 
+Note: This example uses simple environment variables for the API credentials. You might want to change this and use [secrets](https://cloud.google.com/functions/docs/configuring/secrets) instead. 
+
 ### Code 
 In the *Code* section, pick the most current *Python* option. Replace the default contents for `main.py` and `requirements.txt` with the code from this repository.
 
