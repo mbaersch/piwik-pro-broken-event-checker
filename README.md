@@ -16,12 +16,13 @@ For more information about how to receive messages in Slack using a Webhook visi
 ### Code 
 In the *Code* section, pick the most current *Python* option. Replace the default contents for `main.py` and `requirements.txt` with the code from this repository.
 
-Enter your site id from Piwik PRO as `site_id` in the code. 
+#### Adjust Code 
+Enter your site id from Piwik PRO as `site_id` in the code and change the `instance_url` from `credentials` to match your instance URL.  
 
 ### Finalize 
 In order to test the function, change the `search_debug_type` variable value from *17* to one of the other event types from the comment like *4* for *Search* events, visit your site and perform a search in order to make sure there is at least one current session with a search event.  
 
-If everything works, change `search_debug_type` back tu *17* and deploy.
+If everything works, change `search_debug_type` back to *17* and deploy.
 
 ### Function Response
 The response will be a raw text (no HTML) with *"no events"* or a list of found broken events with their IDs, error messages from the session stream and a complete dump of the log stream for that certain event ID.  
