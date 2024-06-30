@@ -1,6 +1,9 @@
 # Piwik PRO Broken Event Checker
 GCP Cloud Function for checking Piwik PRO Debugger API for broken events and sending debug info as Slack notification 
 
+## Using Slack Messages
+The function provided in this example uses a webhook to send Slack messages. For more information about how to receive messages in Slack using a Webhook visit [this help article from Slack](https://api.slack.com/messaging/webhooks). If you do not want to use this feature, you can adjust the code and delete or comment out the line beginning with `hook_response`. Note: you will only get logs in this case and have to look for messages there or use the App Script example or any other automation to receive emails with data about broken events instead.  
+
 ## Set-up Cloud Function
 Create a new Cloud Funtion in GCP. Enter a name and activate *Allow unauthenticated invocations*.
 
@@ -10,8 +13,6 @@ Open the *Runtime, build, connections and security settings* block and create th
 - `SLACK_WEBHOOK_URL`: add a complete webhook URL for your Slack app that can send a message whenever a broken event is found
 - `PP_CLIENT_ID`: your API client ID from your Piwik PRO account (help article about [how to find API credentials](https://help.piwik.pro/support/questions/generate-api-credentials/))
 - `PP_CLIENT_SECRET`: your API client secret from your Piwik PRO account
-
-For more information about how to receive messages in Slack using a Webhook visit [this help article from Slack](https://api.slack.com/messaging/webhooks) 
 
 ### Code 
 In the *Code* section, pick the most current *Python* option. Replace the default contents for `main.py` and `requirements.txt` with the code from this repository.
@@ -47,7 +48,7 @@ function checkBrokenEvents() {
     Logger.log("ERROR: " + res);
     MailApp.sendEmail({
       to: setupEmailAddress,
-      subject: "Error Executing Piwik PRO Event Check!",
+      subject: "Error Executing Piwik PRO Event Checker!",
       htmlBody: "<p>Cloud Function threw an error (" + respCode + ").Message: "+res
     });  
   } else {
@@ -57,7 +58,7 @@ function checkBrokenEvents() {
       Logger.log("Sending result as email: " + res);
       MailApp.sendEmail({
         to: setupEmailAddress,
-        subject: "Message fron Piwik PRO Event Check",
+        subject: "Message fron Piwik PRO Event Checker",
         htmlBody: res
       });  
 
