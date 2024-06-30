@@ -4,7 +4,7 @@ import json
 import os
 
 search_debug_type = 17 #8 = Goal, 4 = Search, 17 = broken event, 18 = excluded event
-site_id = "bb338e1a-12f8-5353-ac63-9fd8b1f928a1"
+site_id = "enter-your-site-id-here"
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -12,7 +12,7 @@ webhook_url = os.environ.get('SLACK_WEBHOOK_URL')
 credentials = {
   "client_id": os.environ.get('PP_CLIENT_ID'),
   "client_secret": os.environ.get('PP_CLIENT_SECRET'),
-  "instance_url": "https://mbsl.piwik.pro"
+  "instance_url": "https://your-instance.piwik.pro"
 }
 
 def get_auth_token(credentials):
