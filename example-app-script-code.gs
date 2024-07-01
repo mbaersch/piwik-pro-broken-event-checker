@@ -1,11 +1,15 @@
-/*FYI: this setup block is defined in an additional file. Do so yourself or add your values here. Leave "webhook_url" blank if you do not want to send messages*/
+/*FYI: this setup block is defined in an additional file. 
+       Do so yourself or add your values here. Leave "webhook_url" or 
+       "email_address" blank if you do not want to send messages / mails 
+*/
 if (typeof(setup) == "undefined") {
   let setup = {
      "client_id": "xxxxx",
      "client_secret": "xxxxxxxxxxxxxxxx",
      "webhook_url": "https://hooks.slack.com/services/xxxx/yyyy/zzzz",
      "site_id": "enter-your-site-id-here",
-     "site_url": "https://your-instance.piwik.pro"
+     "site_url": "https://your-instance.piwik.pro",
+     "email_address": "yourmail@example.com"
   };
 } 
 
@@ -51,8 +55,9 @@ function getBrokenEvents() {
             res += event["event_type"][1] +  ", ID: " + event["event_id"] + ", Message: " + err + "\n";
             url = setup["site_url"] + '/api/tracker/v1/log?app_id=' + setup["site_id"] + '&event_ids=' + event["event_id"] +
                                   '&server_time_min=' + rep_start + '&server_time_max=' + rep_end;
+            //this is not working here and I don´t know why :( getting random 500 or 400 responses. That should explain this odd code construction 
             let loginfo = "Error fetching log";
-            try {
+            if (false) try {
               let log_response = UrlFetchApp.fetch(url, options);
               let loginfo = log_response.getContentText();
               res += "LOG:\n----\n" + loginfo + "\n";
@@ -74,4 +79,33 @@ function getBrokenEvents() {
     Logger.log(e);
   };
   return res;
+}
+
+
+function addReportLine(sheet, inf) {
+  let lastRow = sheet.getLastRow(), dt = (new Date()).toISOString().split('.')[0].replace("T", " ");
+  dataRange = sheet.getRange(lastRow+1, 1, 1, 2);
+  dataRange.setValues([[dt, inf]]); 
+  SpreadsheetApp.flush();
+  Logger.log("results for "+dt+" stored in spreadsheet");
+}
+
+
+function checkBrokenEvents() {
+  var res = getBrokenEvents();
+  Logger.log("Done, Result:\n"+res);
+  //store in spreadsheet
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getActiveSheet();
+  addReportLine(sheet, res);
+
+  //check result and send mail
+  if ((res != "no events") && setup["email_address"] && (setup["email_address"] != "")) {
+    Logger.log("Sending result as email to "+setup["email_address"]);
+    MailApp.sendEmail({
+      to: setup["email_address"],
+      subject: "Message fron Piwik PRO Event Checker",
+      htmlBody: res.replace(/\n/g, "<br>")
+    });  
+  }  
 }
