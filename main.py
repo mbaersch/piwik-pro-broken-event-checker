@@ -1,4 +1,5 @@
-#LIST BROKEN EVENTS
+#Example Cloud Function Code: Check Piwik PRO API for broken events. 
+#Find set-up details for CF and environment in README 
 import requests
 import json
 import os
