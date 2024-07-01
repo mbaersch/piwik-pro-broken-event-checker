@@ -72,7 +72,7 @@ function checkBrokenEvents() {
 ```
 
 ### Use App Scripts for the whole thing
-If you can or do not want to use a GCP Cloud Function for this check, you can use a Google Apps Script for the whole process. A basic example can be found in this repository as [example-app-script-code.gs](example-app-script-code.gs). You can use it as a staring point and add functionality like sending email notifications only once a day, storing more data in the spreadsheet or whatever you like.  
+If you can or do not want to use a GCP Cloud Function for this check, you can use a Google Apps Script for the whole process. A basic example can be found in this repository as [example-app-script-code.gs](example-app-script-code.gs). You can use it as a staring point and add functionality like sending email notifications only once a day, deduplicating events and messages, storing more data in the spreadsheet or whatever you like.  
 
 ## Message Volume Control 
 Per default, a limit of 10 sessions with broken events are processed and all broken events are reported seperately as a Slack message. If that floods your channel with too much (similar) messages, change the  `session_limit` variable that feeds the `limit` parameter of the `rep_response` API call. 
