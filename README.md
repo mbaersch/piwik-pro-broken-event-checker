@@ -1,5 +1,5 @@
 # Piwik PRO Broken Event Checker
-GCP Cloud Function for checking Piwik PRO Debugger API for broken events and sending debug info as Slack notification 
+GCP Cloud Function (optional: Apps Script version) for checking Piwik PRO Debugger API for broken events and sending debug info as Slack notification 
 
 ## Using Slack Messages
 The function provided in this example uses a webhook to send Slack messages. For more information about how to receive messages in Slack using a Webhook visit [this help article from Slack](https://api.slack.com/messaging/webhooks). If you do not want to use this feature, you can adjust the code and delete or comment out the line beginning with `hook_response`. Note: you will only get logs in this case and have to look for messages there or use the App Script example or any other automation to receive emails with data about broken events instead.  
