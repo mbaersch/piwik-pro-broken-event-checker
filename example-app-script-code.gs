@@ -1,7 +1,13 @@
-/*FYI: this setup block is defined in an additional file. 
-       Do so yourself or add your values here. Leave "webhook_url" or 
-       "email_address" blank if you do not want to send messages / mails 
+/*FYI:     the setup block below is defined in an additional file. 
+           Do so yourself or add your values here. Leave "webhook_url" or 
+           "email_address" blank if you do not want to send messages / mails 
+
+  TRIGGER: If you want to trigger this function regularly, adjust the 
+           lookback_window parameter in "getBrokenEvents" and schedule  
+           "checkBrokenEvents" to run the check, store results and 
+           send mails
 */
+
 if (typeof(setup) == "undefined") {
   let setup = {
      "client_id": "xxxxx",
