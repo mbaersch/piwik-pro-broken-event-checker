@@ -21,6 +21,7 @@ if (typeof(setup) == "undefined") {
 
 let search_debug_type = 17, //8 = Goal, 4 = Search, 17 = broken event, 18 = excluded event
    session_limit = 5;
+   always_log = true;
 
 /*****************************************************************************************/
 
@@ -30,7 +31,8 @@ function checkBrokenEvents() {
   //store in spreadsheet
   var ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getActiveSheet();
-  addReportLine(sheet, res);
+  if (always_log === true || res != "no events")
+    addReportLine(sheet, res);
 
   //check result and send mail
   if ((res != "no events") && setup["email_address"] && (setup["email_address"] != "")) {
