@@ -13,20 +13,19 @@ session_limit = 10
 webhook_url = os.environ.get('SLACK_WEBHOOK_URL')
 credentials = {
   "client_id": os.environ.get('PP_CLIENT_ID'),
-  "client_secret": os.environ.get('PP_CLIENT_SECRET'),
-  "instance_url": site_url
+  "client_secret": os.environ.get('PP_CLIENT_SECRET')
 }
 
 def get_auth_token(credentials):
     auth_body = {"grant_type": "client_credentials", "client_id": credentials["client_id"], "client_secret": credentials["client_secret"]}
-    return requests.post(credentials["instance_url"] + '/auth/token', data=auth_body).json()["access_token"]
+    return requests.post(site_url + '/auth/token', data=auth_body).json()["access_token"]
 
 def do_check(args):
     res = ""
     token = get_auth_token(credentials)
 
     try:
-        rep_response = requests.get(credentials["instance_url"] + '/api/tracker/v1/debugger?app_id=' + site_id + '&lookup_window=300&limit=' + str(session_limit) + '&event_type=' + str(search_debug_type), headers={"Authorization": 'Bearer ' + token})
+        rep_response = requests.get(site_url + '/api/tracker/v1/debugger?app_id=' + site_id + '&lookup_window=300&limit=' + str(session_limit) + '&event_type=' + str(search_debug_type), headers={"Authorization": 'Bearer ' + token})
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 401:
             print("Auth token is no longer valid.")
@@ -54,7 +53,7 @@ def do_check(args):
                         if "error_message" in event:
                             err = event["error_message"]
                             #get debug info from log
-                            log_response = requests.get(credentials["instance_url"] + '/api/tracker/v1/log?app_id='+site_id+'&event_ids='+event_id+'&server_time_min=' + rep_start + '&server_time_max=' + rep_end, headers={"Authorization": 'Bearer ' + token})
+                            log_response = requests.get(site_url + '/api/tracker/v1/log?app_id='+site_id+'&event_ids='+event_id+'&server_time_min=' + rep_start + '&server_time_max=' + rep_end, headers={"Authorization": 'Bearer ' + token})
                             err += "\n\nLOG:\n----n" + log_response.content.decode()
                         res += err  + "\n"
                         hook_payload = {"text" : 'PP Event Checker: ' + event["event_type"][1] + ' found with following message: ' + err}
