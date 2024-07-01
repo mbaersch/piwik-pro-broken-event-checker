@@ -78,8 +78,10 @@ function getBrokenEvents() {
     let options = {'method' : 'get', 'muteHttpExceptions': false, 'headers': {'Authorization': 'Bearer ' + token}};
     let repResponse = UrlFetchApp.fetch(url, options);
 
-    let cnt = repResponse.getContentText();
-    if (cnt == "") res = "no events"; 
+    let cnt = repResponse.getContentText(), 
+      doCheckLog = true; 
+
+    if (cnt == "") res = "no events";
     else {
       let sessions = cnt.split("\n");
       sessions.forEach(session => {
@@ -93,15 +95,17 @@ function getBrokenEvents() {
           if (event["event_type"][0] === search_debug_type) {
             let err = (event["error_message"]) ? event["error_message"] : "no errors";
             res += event["event_type"][1] +  ", ID: " + event["event_id"] + ", Message: " + err + "\n";
-            url = setup["site_url"] + '/api/tracker/v1/log?app_id=' + setup["site_id"] + '&event_ids=' + event["event_id"] +
+            let log_url = setup["site_url"] + '/api/tracker/v1/log?app_id=' + setup["site_id"] + '&event_ids=' + event["event_id"] +
                                   '&server_time_min=' + rep_start + '&server_time_max=' + rep_end;
-            //this is not working here and I don´t know why :( getting random 500 or 400 responses. That should explain this odd code construction 
+            //this is not working all the time and I don´t know why :( getting random 500 or 400 responses. That should explain this odd code construction 
             let loginfo = "Error fetching log";
-            if (false) try {
-              let log_response = UrlFetchApp.fetch(url, options);
+            if (doCheckLog === true) try {
+              let log_response = UrlFetchApp.fetch(log_url, options);
+              //Logger.log(log_response);
               let loginfo = log_response.getContentText();
               res += "LOG:\n----\n" + loginfo + "\n";
             } catch (e) {
+              doCheckLog = false;
               Logger.log(e);
             }  
             //only one Slack message per session
@@ -118,5 +122,6 @@ function getBrokenEvents() {
   } catch(e) {
     Logger.log(e);
   };
+  Logger.log(res);
   return res;
 }
