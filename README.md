@@ -60,8 +60,8 @@ function checkBrokenEvents() {
       Logger.log("Sending result as email: " + res);
       MailApp.sendEmail({
         to: setupEmailAddress,
-        subject: "Message fron Piwik PRO Event Checker",
-        htmlBody: res
+        subject: "Message from Piwik PRO Event Checker",
+        htmlBody: res.replace(/\n/g, "<br>")
       });  
 
     } else {
