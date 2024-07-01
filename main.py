@@ -1,13 +1,13 @@
-#Example Cloud Function Code: Check Piwik PRO API for broken events. 
-#Find set-up details for CF and environment in README 
+#LIST BROKEN EVENTS
 import requests
 import json
 import os
 
 search_debug_type = 17 #8 = Goal, 4 = Search, 17 = broken event, 18 = excluded event
-site_id = "enter-your-site-id-here"
-site_url = "https://your-instance.piwik.pro"
-session_limit = 10
+site_id = "bb338e1a-12f8-5353-ac63-9fd8b1f928a1"
+site_url = "https://mbsl.piwik.pro"
+session_limit = 5
+lookup_window = 300
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -24,9 +24,8 @@ def get_auth_token(credentials, site_url):
 def do_check(args):
     res = ""
     token = get_auth_token(credentials, site_url)
-
     try:
-        rep_response = requests.get(site_url + '/api/tracker/v1/debugger?app_id=' + site_id + '&lookup_window=300&limit=' + str(session_limit) + '&event_type=' + str(search_debug_type), headers={"Authorization": 'Bearer ' + token})
+        rep_response = requests.get(site_url + '/api/tracker/v1/debugger?app_id=' + site_id + '&lookup_window=' + str(lookup_window) + '&limit=' + str(session_limit) + '&event_type=' + str(search_debug_type), headers={"Authorization": 'Bearer ' + token})
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 401:
             print("Auth token is no longer valid.")
@@ -51,13 +50,16 @@ def do_check(args):
                         event_id = str(event["event_id"])
                         res += "found " + event["event_type"][1] + ", ID: " + event_id + "\n"
                         err = "no errors"
+                        loginfo = "no log available"
                         if "error_message" in event:
                             err = event["error_message"]
                             #get debug info from log
                             log_response = requests.get(site_url + '/api/tracker/v1/log?app_id='+site_id+'&event_ids='+event_id+'&server_time_min=' + rep_start + '&server_time_max=' + rep_end, headers={"Authorization": 'Bearer ' + token})
-                            err += "\n\nLOG:\n----n" + log_response.content.decode()
+                            loginfo = log_response.content.decode() 
                         res += err  + "\n"
-                        hook_payload = {"text" : 'PP Event Checker: ' + event["event_type"][1] + ' found with following message: ' + err}
+                        if loginfo != "no log available":
+                            res += "Log:\n" + loginfo  
+                        hook_payload = {"text" : '*PP Event Checker Alert*: ' + event["event_type"][1] + ' found with following message: ' + err + '\n_Log_:```' + loginfo + '```'}
                         hook_response = requests.post(webhook_url, headers = {"Content-type": 'application/json'}, json = hook_payload)
                         break
             except:
