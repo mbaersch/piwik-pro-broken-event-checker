@@ -32,8 +32,9 @@ function getBrokenEvents() {
   let token = getAuthToken();
   let res = "";
   try {
+   //set a lookback window to a max of 300 or 60 (or 70) if run every hour...
     let url = setup["site_url"] + '/api/tracker/v1/debugger?app_id=' + 
-              setup["site_id"] + '&lookup_window=300&limit=' + session_limit.toString() + 
+              setup["site_id"] + '&lookup_window=70&limit=' + session_limit.toString() + 
               '&event_type=' + search_debug_type.toString();
     let options = {'method' : 'get', 'muteHttpExceptions': false, 'headers': {'Authorization': 'Bearer ' + token}};
     let repResponse = UrlFetchApp.fetch(url, options);
