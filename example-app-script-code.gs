@@ -22,6 +22,29 @@ if (typeof(setup) == "undefined") {
 let search_debug_type = 17, //8 = Goal, 4 = Search, 17 = broken event, 18 = excluded event
    session_limit = 5;
 
+/*****************************************************************************************/
+
+function checkBrokenEvents() {
+  var res = getBrokenEvents();
+  Logger.log("Done, Result:\n"+res);
+  //store in spreadsheet
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getActiveSheet();
+  addReportLine(sheet, res);
+
+  //check result and send mail
+  if ((res != "no events") && setup["email_address"] && (setup["email_address"] != "")) {
+    Logger.log("Sending result as email to "+setup["email_address"]);
+    MailApp.sendEmail({
+      to: setup["email_address"],
+      subject: "Message from Piwik PRO Event Checker",
+      htmlBody: res.replace(/\n/g, "<br>")
+    });  
+  }  
+}
+
+/*****************************************************************************************/
+
 function getAuthToken() {
   let auth_body = {"grant_type": "client_credentials", "client_id": setup["client_id"], "client_secret": setup["client_secret"]};
   var response = UrlFetchApp.fetch(
@@ -33,6 +56,16 @@ function getAuthToken() {
         });
   return JSON.parse(response.getContentText())["access_token"];
 }
+
+
+function addReportLine(sheet, inf) {
+  let lastRow = sheet.getLastRow(), dt = (new Date()).toISOString().split('.')[0].replace("T", " ");
+  dataRange = sheet.getRange(lastRow+1, 1, 1, 2);
+  dataRange.setValues([[dt, inf]]); 
+  SpreadsheetApp.flush();
+  Logger.log("results for "+dt+" stored in spreadsheet");
+}
+
 
 function getBrokenEvents() {
   let token = getAuthToken();
@@ -86,33 +119,4 @@ function getBrokenEvents() {
     Logger.log(e);
   };
   return res;
-}
-
-
-function addReportLine(sheet, inf) {
-  let lastRow = sheet.getLastRow(), dt = (new Date()).toISOString().split('.')[0].replace("T", " ");
-  dataRange = sheet.getRange(lastRow+1, 1, 1, 2);
-  dataRange.setValues([[dt, inf]]); 
-  SpreadsheetApp.flush();
-  Logger.log("results for "+dt+" stored in spreadsheet");
-}
-
-
-function checkBrokenEvents() {
-  var res = getBrokenEvents();
-  Logger.log("Done, Result:\n"+res);
-  //store in spreadsheet
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
-  var sheet = ss.getActiveSheet();
-  addReportLine(sheet, res);
-
-  //check result and send mail
-  if ((res != "no events") && setup["email_address"] && (setup["email_address"] != "")) {
-    Logger.log("Sending result as email to "+setup["email_address"]);
-    MailApp.sendEmail({
-      to: setup["email_address"],
-      subject: "Message from Piwik PRO Event Checker",
-      htmlBody: res.replace(/\n/g, "<br>")
-    });  
-  }  
 }
