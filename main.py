@@ -16,13 +16,13 @@ credentials = {
   "client_secret": os.environ.get('PP_CLIENT_SECRET')
 }
 
-def get_auth_token(credentials):
+def get_auth_token(credentials, site_url):
     auth_body = {"grant_type": "client_credentials", "client_id": credentials["client_id"], "client_secret": credentials["client_secret"]}
     return requests.post(site_url + '/auth/token', data=auth_body).json()["access_token"]
 
 def do_check(args):
     res = ""
-    token = get_auth_token(credentials)
+    token = get_auth_token(credentials, site_url)
 
     try:
         rep_response = requests.get(site_url + '/api/tracker/v1/debugger?app_id=' + site_id + '&lookup_window=300&limit=' + str(session_limit) + '&event_type=' + str(search_debug_type), headers={"Authorization": 'Bearer ' + token})
