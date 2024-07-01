@@ -5,6 +5,8 @@ import os
 
 search_debug_type = 17 #8 = Goal, 4 = Search, 17 = broken event, 18 = excluded event
 site_id = "enter-your-site-id-here"
+site_url = "https://your-instance.piwik.pro"
+session_limit = 10
 
 #+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
@@ -12,7 +14,7 @@ webhook_url = os.environ.get('SLACK_WEBHOOK_URL')
 credentials = {
   "client_id": os.environ.get('PP_CLIENT_ID'),
   "client_secret": os.environ.get('PP_CLIENT_SECRET'),
-  "instance_url": "https://your-instance.piwik.pro"
+  "instance_url": site_url
 }
 
 def get_auth_token(credentials):
@@ -24,7 +26,7 @@ def do_check(args):
     token = get_auth_token(credentials)
 
     try:
-        rep_response = requests.get(credentials["instance_url"] + '/api/tracker/v1/debugger?app_id='+site_id+'&lookup_window=300&event_type='+str(search_debug_type), headers={"Authorization": 'Bearer ' + token})
+        rep_response = requests.get(credentials["instance_url"] + '/api/tracker/v1/debugger?app_id=' + site_id + '&lookup_window=300&limit=' + str(session_limit) + '&event_type=' + str(search_debug_type), headers={"Authorization": 'Bearer ' + token})
     except requests.exceptions.HTTPError as e:
         if e.response.status_code == 401:
             print("Auth token is no longer valid.")
