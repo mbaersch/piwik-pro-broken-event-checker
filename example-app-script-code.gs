@@ -111,7 +111,7 @@ function checkBrokenEvents() {
     Logger.log("Sending result as email to "+setup["email_address"]);
     MailApp.sendEmail({
       to: setup["email_address"],
-      subject: "Message fron Piwik PRO Event Checker",
+      subject: "Message from Piwik PRO Event Checker",
       htmlBody: res.replace(/\n/g, "<br>")
     });  
   }  
