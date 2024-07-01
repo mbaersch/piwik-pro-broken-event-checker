@@ -30,7 +30,7 @@ If everything works, change `search_debug_type` back to *17* and deploy.
 ### Function Response
 The response will be a raw text (no HTML) with *"no events"* or a list of found broken events with their IDs, error messages from the session stream and a complete dump of the log stream for that certain event ID.  
 ## Schedule executions
-The function checks the Debugger API for broken events in all debugger logs for the last 6 hours. You can use [GCP Cloud Scheduler to trigger the function](https://cloud.google.com/scheduler/docs/tut-gcf-pub-sub), automation tools like *Zapier*, *Make*, or a Google App Script with a scheduled trigger to call the HTTP trigger URL that starts your Cloud Function (as it is cunfigured to be available without authentification).
+The function checks the Debugger API for broken events in all debugger logs for the last 5 hours. You can use [GCP Cloud Scheduler to trigger the function](https://cloud.google.com/scheduler/docs/tut-gcf-pub-sub), automation tools like *Zapier*, *Make*, or a Google App Script with a scheduled trigger to call the HTTP trigger URL that starts your Cloud Function (as it is cunfigured to be available without authentification).If you want to trigger the function hourly, adjust the `lookup_window` parameter value.
 
 Note: A response will be provided in every case, so make sure to only act if there is not just the standard *"no events"* response content.
 
