@@ -22,6 +22,7 @@ if (typeof(setup) == "undefined") {
 let search_debug_type = 17, //8 = Goal, 4 = Search, 17 = broken event, 18 = excluded event
    session_limit = 5;
    always_log = true;
+   lookup_window = 70;
 
 /*****************************************************************************************/
 
@@ -75,14 +76,11 @@ function getBrokenEvents() {
   try {
    //set a lookback window to a max of 300 or 60 (or 70) if run every hour...
     let url = setup["site_url"] + '/api/tracker/v1/debugger?app_id=' + 
-              setup["site_id"] + '&lookup_window=70&limit=' + session_limit.toString() + 
+              setup["site_id"] + '&lookup_window=' + lookup_window.toString() + '&limit=' + session_limit.toString() + 
               '&event_type=' + search_debug_type.toString();
     let options = {'method' : 'get', 'muteHttpExceptions': false, 'headers': {'Authorization': 'Bearer ' + token}};
     let repResponse = UrlFetchApp.fetch(url, options);
-
-    let cnt = repResponse.getContentText(), 
-      doCheckLog = true; 
-
+    let cnt = repResponse.getContentText(); 
     if (cnt == "") res = "no events";
     else {
       let sessions = cnt.split("\n");
@@ -93,29 +91,22 @@ function getBrokenEvents() {
             events = json_session["events"];      
         let hook_sent = false;
         events.forEach(event => {
-          //Logger.log(event["event_type"][1] + ", ID: " + event["event_id"]);
+          let eventId = (event["event_id_str"]).toString();
+          //Logger.log(event["event_type"][1] + ", ID: " + eventId);
           if (event["event_type"][0] === search_debug_type) {
             let err = (event["error_message"]) ? event["error_message"] : "no errors";
-            res += event["event_type"][1] +  ", ID: " + event["event_id"] + ", Message: " + err + "\n";
-            let log_url = setup["site_url"] + '/api/tracker/v1/log?app_id=' + setup["site_id"] + '&event_ids=' + event["event_id"] +
+            res += event["event_type"][1] +  " | ID: " + eventId + " | Message: " + err;
+            let log_url = setup["site_url"] + '/api/tracker/v1/log?app_id=' + setup["site_id"] + '&event_ids=' + eventId +
                                   '&server_time_min=' + rep_start + '&server_time_max=' + rep_end;
-            //this is not working all the time and I don´t know why :( getting random 500 or 400 responses. That should explain this odd code construction 
-            let loginfo = "Error fetching log";
-            if (doCheckLog === true) try {
-              let log_response = UrlFetchApp.fetch(log_url, options);
-              //Logger.log(log_response);
-              let loginfo = log_response.getContentText();
-              res += "LOG:\n----\n" + loginfo + "\n";
-            } catch (e) {
-              doCheckLog = false;
-              Logger.log(e);
-            }  
+            let loginfo = getInfoFromLog(log_url, token);
+            res += " | Request Info:\n" + loginfo + "\n\n";
             //only one Slack message per session
             if ((hook_sent === false) && setup["webhook_url"] && (setup["webhook_url"] != "")) {
               hook_sent = true;
-              let hook_payload = {"text" : 'PP Event Checker: ' + event["event_type"][1] + ' found. Message: ' + err +"\n" + loginfo};
+              let hook_payload = {"text" : '*PP Event Checker Alert*: ' + event["event_type"][1] + ' (ID ' + eventId + ') found.\n_Message_: ' + err +'\n_Request Info_:\n```' + loginfo + '```'};
               let hook_options = {'method' : 'post', 'muteHttpExceptions': false, 'contentType': 'application/json', 'payload' : JSON.stringify(hook_payload)};
               UrlFetchApp.fetch(setup["webhook_url"], hook_options);
+              Logger.log("Slack notification sent");
             }                                  
           }
         });
@@ -124,6 +115,18 @@ function getBrokenEvents() {
   } catch(e) {
     Logger.log(e);
   };
-  Logger.log(res);
+  //Logger.log(res);
   return res;
+}
+
+
+function getInfoFromLog(url, token){
+  try {
+    let repResponse = UrlFetchApp.fetch(url, {'method' : 'get', 'muteHttpExceptions': false, 'headers': {'Authorization': 'Bearer ' + token}});
+    let loginfo = repResponse.getContentText();
+    return loginfo;
+  } catch (e) {
+    Logger.log(e);
+    return "error fetching log."
+  }  
 }
